@@ -1,4 +1,10 @@
 #define ALWAYS_CALIBRATING CALIBRATION_LOOPS == -1
+#define echoPin 9 // attach pin D2 Arduino to pin Echo of HC-SR04
+#define trigPin 10
+long duration; // variable for the duration of sound wave travel
+int distance; 
+int buzzer = 3;
+
 
 #define CALIB_OVERRIDE false
 #if USING_CALIB_PIN && COMMUNICATION == COMM_SERIAL && PIN_CALIB == 0 && !CALIB_OVERRIDE
@@ -8,6 +14,9 @@
 ICommunication* comm;
 int loops = 0;
 void setup() {
+  pinMode(trigPin, OUTPUT);                         // Sets the trigPin as an OUTPUT
+  pinMode(echoPin, INPUT);  
+  Serial.begin(115200);                  
   #if COMMUNICATION == COMM_SERIAL
     comm = new SerialCommunication();
   #elif COMMUNICATION == COMM_BTSERIAL
@@ -25,6 +34,21 @@ void setup() {
 
 void loop() {
   if (comm->isOpen()){
+    digitalWrite(trigPin, LOW);
+    // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
+    digitalWrite(trigPin, HIGH);
+    digitalWrite(trigPin, LOW);
+    // Reads the echoPin, returns the sound wave travel time in microseconds
+    duration = pulseIn(echoPin, HIGH);
+    // Calculating the distance
+    distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
+    if (distance<=5){
+      tone(buzzer, 500, 50);
+    }
+    // Displays the distance on the Serial Monitor
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.println(" cm");
     #if USING_CALIB_PIN
     bool calibButton = getButton(PIN_CALIB) != INVERT_CALIB;
     if (calibButton)
@@ -77,6 +101,7 @@ void loop() {
         }
       }
     #endif
+    
     delay(LOOP_TIME);
   }
 }

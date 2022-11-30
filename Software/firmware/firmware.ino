@@ -85,4 +85,5 @@
   #define PIN_INDEX_MOTOR     5 
   #define PIN_THUMB_MOTOR     6 
   #define PIN_MENU_BTN        8
+
 #endif
